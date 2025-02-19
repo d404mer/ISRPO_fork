@@ -91,15 +91,15 @@ namespace _4337Project
                             using (SqlBulkCopy bulkCopy = new SqlBulkCopy(connection))
                             {
                                 bulkCopy.DestinationTableName = "Clients";
-                                bulkCopy.ColumnMappings.Add("ФИО", "ФИО");
-                                bulkCopy.ColumnMappings.Add("Код клиента", "Код клиента");
-                                bulkCopy.ColumnMappings.Add("Дата рождения", "Дата рождения");
-                                bulkCopy.ColumnMappings.Add("Индекс", "Индекс");
-                                bulkCopy.ColumnMappings.Add("Город", "Город");
-                                bulkCopy.ColumnMappings.Add("Улица", "Улица");
-                                bulkCopy.ColumnMappings.Add("Дом", "Дом");
-                                bulkCopy.ColumnMappings.Add("Квартира", "Квартира");
-                                bulkCopy.ColumnMappings.Add("E-mail", "E-mail");
+                                bulkCopy.ColumnMappings.Add("ФИО", "FIO");
+                                bulkCopy.ColumnMappings.Add("Код клиента", "ClientCode");
+                                bulkCopy.ColumnMappings.Add("Дата рождения", "DateOfBirth");
+                                bulkCopy.ColumnMappings.Add("Индекс", "Index");
+                                bulkCopy.ColumnMappings.Add("Город", "City");
+                                bulkCopy.ColumnMappings.Add("Улица", "Street");
+                                bulkCopy.ColumnMappings.Add("Дом", "House");
+                                bulkCopy.ColumnMappings.Add("Квартира", "Flat");
+                                bulkCopy.ColumnMappings.Add("E-mail", "Email");
 
                                 bulkCopy.WriteToServer(dataTable);
                             }
