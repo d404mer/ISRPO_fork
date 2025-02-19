@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.SqlClient;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+
+
 
 namespace _4337Project
 {
@@ -19,9 +11,23 @@ namespace _4337Project
     /// </summary>
     public partial class _4337_d0h : Window
     {
+        private string connectionString = @"Data Source=DESKTOP-AF0FDGA;Initial Catalog=ISRPO_db;Integrated Security=True;";
+
         public _4337_d0h()
         {
             InitializeComponent();
+        }
+
+        private void Import_Click(object sender, RoutedEventArgs e)
+        {
+            d0h_ImportWindow import = new d0h_ImportWindow();
+            import.Show();
+
+        }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
