@@ -5,6 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_4337Project"
         mc:Ignorable="d"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragEnter="Window_DragEnter"
         Title="Импорт данных" Height="300" Width="300">
     <Grid>
         <TextBlock Text="Перетащите Excel-файл сюда"

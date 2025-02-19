@@ -12,7 +12,7 @@ namespace _4337Project
     public partial class _4337_d0h : Window
     {
         private string connectionString = @"Data Source=DESKTOP-AF0FDGA;Initial Catalog=ISRPO_db;Integrated Security=True;";
-
+   
         public _4337_d0h()
         {
             InitializeComponent();
@@ -22,12 +22,34 @@ namespace _4337Project
         {
             d0h_ImportWindow import = new d0h_ImportWindow();
             import.Show();
-
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
 
         }
-    }
-}
+
+        private void Clear_Click(object sender, RoutedEventArgs e)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    string query = "DELETE FROM Clients";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.ExecuteNonQuery();
+                        MessageBox.Show("Таблица успешно очищена!");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка: {ex.Message}");
+                }
+            }
+        }
+     }
+ }

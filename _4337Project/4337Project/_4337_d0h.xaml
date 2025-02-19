@@ -5,7 +5,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:_4337Project"
         mc:Ignorable="d"
-        Title="_4337_d0h" Height="450" Width="800">
+        Title="_4337_d0h" Height="500" Width="800">
     <Grid>
         <StackPanel HorizontalAlignment="Left" Margin="30">
             <!-- Имя -->
@@ -19,6 +19,9 @@
 
             <!-- Кнопка экспорта -->
             <Button x:Name="Export" Content="Экспорт в Excel"  Width="100" Height="100" Margin="0,0,0,5" Click="Export_Click" />
+
+            <!-- Кнопка очищения таблицы -->
+            <Button x:Name="Clear" Content="Очистить"  Width="100" Height="100" Margin="0,0,0,5" Click="Clear_Click"/>
         </StackPanel>
     </Grid>
 </Window>

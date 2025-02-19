@@ -32,20 +32,6 @@ namespace _4337Project
 
         private void Window_Drop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                if (files.Length > 0)
-                {
-                    string excelFilePath = files[0]; // Берём первый файл
-                    ImportExcel(excelFilePath);
-                }
-            }
-        }
-
-
-        private void ImportExcel(string filePath)
-        {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 try
@@ -58,30 +44,62 @@ namespace _4337Project
                     MessageBox.Show($"Ошибка подключения: {ex.Message}");
                 }
             }
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string excelFilePath = files[0];
+                    ImportExcel(excelFilePath);
+                }
+            }
+        }
+
+
+        private void ImportExcel(string filePath)
+        {
             try
             {
                 using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
                 {
                     using (IExcelDataReader reader = ExcelReaderFactory.CreateReader(stream))
                     {
-                        DataSet result = reader.AsDataSet();
-                        DataTable dataTable = result.Tables[0]; // Первый лист Excel
+                        var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                        {
+                            ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                            {
+                                UseHeaderRow = true
+                            }
+                        });
 
+                        DataTable dataTable = result.Tables[0]; 
+
+                        foreach (DataRow row in dataTable.Rows)
+                        {
+                            if (!int.TryParse(row["Код клиента"].ToString(), out int clientCode))
+                            {
+                                row["Код клиента"] = 0;
+                            }
+
+                        }
+
+                        // Теперь безопасно вставляем данные в базу
                         using (SqlConnection connection = new SqlConnection(connectionString))
                         {
                             connection.Open();
                             using (SqlBulkCopy bulkCopy = new SqlBulkCopy(connection))
                             {
                                 bulkCopy.DestinationTableName = "Clients";
-                                bulkCopy.ColumnMappings.Add(0, "ФИО");
-                                bulkCopy.ColumnMappings.Add(1, "Код клиента");
-                                bulkCopy.ColumnMappings.Add(2, "Дата рождения");
-                                bulkCopy.ColumnMappings.Add(3, "Индекс");
-                                bulkCopy.ColumnMappings.Add(4, "Город");
-                                bulkCopy.ColumnMappings.Add(5, "Улица");
-                                bulkCopy.ColumnMappings.Add(6, "Дом");
-                                bulkCopy.ColumnMappings.Add(7, "Квартира");
-                                bulkCopy.ColumnMappings.Add(8, "E-mail");
+                                bulkCopy.ColumnMappings.Add("ФИО", "ФИО");
+                                bulkCopy.ColumnMappings.Add("Код клиента", "Код клиента");
+                                bulkCopy.ColumnMappings.Add("Дата рождения", "Дата рождения");
+                                bulkCopy.ColumnMappings.Add("Индекс", "Индекс");
+                                bulkCopy.ColumnMappings.Add("Город", "Город");
+                                bulkCopy.ColumnMappings.Add("Улица", "Улица");
+                                bulkCopy.ColumnMappings.Add("Дом", "Дом");
+                                bulkCopy.ColumnMappings.Add("Квартира", "Квартира");
+                                bulkCopy.ColumnMappings.Add("E-mail", "E-mail");
 
                                 bulkCopy.WriteToServer(dataTable);
                             }
@@ -90,12 +108,14 @@ namespace _4337Project
                 }
 
                 MessageBox.Show("Импорт завершен!");
+                this.Close();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка импорта: {ex.Message}");
             }
         }
+
 
     }
 }
