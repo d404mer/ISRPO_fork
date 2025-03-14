@@ -4,8 +4,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Win32;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using OfficeOpenXml;
 
 namespace _4337Project
@@ -111,9 +116,9 @@ namespace _4337Project
         {
             using (ExcelPackage excel = new ExcelPackage())
             {
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial; 
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-                var groupedByStreet = clients.GroupBy(c => c.Street);  
+                var groupedByStreet = clients.GroupBy(c => c.Street);
 
                 foreach (var group in groupedByStreet)
                 {
@@ -152,14 +157,143 @@ namespace _4337Project
             bool? result = dlg.ShowDialog();
             return result == true ? dlg.FileName : null;
         }
-    }
 
-    public class Client
-    {
-        public int ClientCode { get; set; }    
-        public string FIO { get; set; }       
-        public string Email { get; set; }      
-        public string Street { get; set; }    
-    }
+        private void jsonImport_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*"
+            };
 
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string jsonContent = File.ReadAllText(openFileDialog.FileName);
+
+                    if (string.IsNullOrWhiteSpace(jsonContent))
+                    {
+                        MessageBox.Show("Выбранный файл пуст!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Преобразование ключей перед десериализацией
+                    jsonContent = jsonContent
+                        .Replace("CodeClient", "ClientCode")
+                        .Replace("FullName", "FIO")
+                        .Replace("E_mail", "Email");
+
+                    List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(jsonContent);
+
+                    if (clients == null || clients.Count == 0)
+                    {
+                        MessageBox.Show("Файл JSON не содержит данных или формат некорректен.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Проверка данных перед добавлением
+                    foreach (var client in clients)
+                    {
+                        if (client.ClientCode <= 0 ||
+                            string.IsNullOrWhiteSpace(client.FIO) ||
+                            string.IsNullOrWhiteSpace(client.Email) ||
+                            string.IsNullOrWhiteSpace(client.Street))
+                        {
+                            MessageBox.Show("Обнаружены некорректные данные в JSON.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+
+                    SaveClientsToDatabase(clients);
+                    MessageBox.Show("Данные успешно импортированы!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка импорта: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+
+        private void SaveClientsToDatabase(List<Client> clients)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                foreach (var client in clients)
+                {
+                    string query = "INSERT INTO Clients (ClientCode, FIO, Email, Street) VALUES (@ClientCode, @FIO, @Email, @Street)";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ClientCode", client.ClientCode);
+
+                        if (string.IsNullOrEmpty(client.FIO))
+                            command.Parameters.AddWithValue("@FIO", DBNull.Value);
+                        else
+                            command.Parameters.AddWithValue("@FIO", client.FIO);
+
+                        if (string.IsNullOrEmpty(client.Email))
+                            command.Parameters.AddWithValue("@Email", DBNull.Value);
+                        else
+                            command.Parameters.AddWithValue("@Email", client.Email);
+
+                        if (string.IsNullOrEmpty(client.Street))
+                            command.Parameters.AddWithValue("@Street", DBNull.Value);
+                        else
+                            command.Parameters.AddWithValue("@Street", client.Street);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
+
+
+
+        private void jsonExport_Click(object sender, RoutedEventArgs e)
+        {
+            List<Client> clients = LoadClientsFromDatabase();
+            var groupedClients = clients.GroupBy(c => c.Street);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Word Documents (*.docx)|*.docx"
+            };
+
+            if(saveFileDialog.ShowDialog() == true)
+            {
+                using (WordprocessingDocument document = WordprocessingDocument.Create(saveFileDialog.FileName, WordprocessingDocumentType.Document))
+                {
+                    MainDocumentPart mainPart = document.AddMainDocumentPart();
+                    mainPart.Document = new Document();
+                    Body body = new Body();
+
+                    foreach (var group in groupedClients)
+                    {
+                        body.Append(new Paragraph(new Run(new Text($"Street: {group.Key}")) { RunProperties = new RunProperties(new Bold()) }));
+
+                        foreach (var client in group)
+                        {
+                            body.Append(new Paragraph(new Run(new Text($"{client.FIO}, {client.Email}"))));
+                        }
+                    }
+
+                    mainPart.Document.Append(body);
+                    mainPart.Document.Save();
+                }
+
+                MessageBox.Show("Данные экспортированы в Word");
+            }
+        }
+
+
+        public class Client
+        {
+            public int ClientCode { get; set; }
+            public string FIO { get; set; }
+            public string Email { get; set; }
+            public string Street { get; set; }
+        }
+    }
 }

@@ -7,21 +7,33 @@
         mc:Ignorable="d"
         Title="_4337_d0h" Height="500" Width="800">
     <Grid>
-        <StackPanel HorizontalAlignment="Left" Margin="30">
-            <!-- Имя -->
-            <Label Content="d0h" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,5"/>
+        <StackPanel Orientation="Horizontal" Margin="30">
 
-            <!-- Возраст -->
-            <Label Content="mne 19" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,5"/>
+            <StackPanel HorizontalAlignment="Left" >
+                <!-- Имя -->
+                <Label Content="d0h" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,5"/>
 
-            <!-- Кнопка импорта -->
-            <Button x:Name="Import" Content="Импорт данных" Width="100" Height="100" Margin="0,0,0,5" Click="Import_Click" />
+                <!-- Возраст -->
+                <Label Content="mne 19" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,5"/>
 
-            <!-- Кнопка экспорта -->
-            <Button x:Name="Export" Content="Экспорт в Excel"  Width="100" Height="100" Margin="0,0,0,5" Click="Export_Click" />
+                <!-- Кнопка импорта -->
+                <Button x:Name="Import" Content="Импорт данных" Width="100" Height="100" Margin="0,0,0,5" Click="Import_Click" />
 
-            <!-- Кнопка очищения таблицы -->
-            <Button x:Name="Clear" Content="Очистить"  Width="100" Height="100" Margin="0,0,0,5" Click="Clear_Click"/>
+                <!-- Кнопка экспорта -->
+                <Button x:Name="Export" Content="Экспорт в Excel"  Width="100" Height="100" Margin="0,0,0,5" Click="Export_Click" />
+
+                <!-- Кнопка очищения таблицы -->
+                <Button x:Name="Clear" Content="Очистить"  Width="100" Height="100" Margin="0,0,0,5" Click="Clear_Click"/>
+
+
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical" Margin="30 62 0 0">
+                <Button x:Name="jsonImport" Content="Json импорт"  Width="100" Height="100" Margin="0,0,0,5" Click="jsonImport_Click" />
+                <Button x:Name="jsonExport" Content="Экспорт в Word"  Width="100" Height="100" Margin="0,0,0,5" Click="jsonExport_Click" />
+            </StackPanel>
         </StackPanel>
+        
+        
     </Grid>
 </Window>
